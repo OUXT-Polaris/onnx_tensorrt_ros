@@ -5,7 +5,7 @@
   <arg name="vision_info_topic" default="$(arg node_name)/vision_info"/>
   <arg name="visualization" default="true"/>
 
-  <node name="$(arg node_name)" pkg="onnx_tensorrt_yolov3" type="onnx_tensorrt_yolov3" respawn="$(arg respawn)" output="log">
+  <node name="$(arg node_name)" pkg="onnx_tensorrt_ros" type="onnx_tensorrt_yolov3" respawn="$(arg respawn)" output="log">
     <param name="image_topic" value="$(arg image_topic)"/>
     <param name="vision_info_topic" value="$(arg vision_info_topic)"/>
   </node>
