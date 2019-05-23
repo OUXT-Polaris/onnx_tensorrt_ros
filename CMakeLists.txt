@@ -9,6 +9,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   vision_msgs
+  pluginlib
+  nodelet
 )
 
 catkin_package(
@@ -20,5 +22,30 @@ catkin_package(
 
 include_directories(
   include
+  thrid_party/TensorRT-5.1.5.0/include
   ${catkin_INCLUDE_DIRS}
+)
+
+macro(add_nodelet node_name nodelet_cppfile)
+  set(NODE_NAME ${node_name})
+  set(NODELET_NAME onnx_tensorrt_ros/${node_name})
+  configure_file(src/node/standalone_nodelet_exec.cpp.in ${node_name}.cpp @ONLY)
+  add_executable(${node_name}_exe ${node_name}.cpp)
+  SET_TARGET_PROPERTIES(${node_name}_exe PROPERTIES OUTPUT_NAME ${node_name})
+  target_link_libraries(${node_name}_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+  list(APPEND _onnx_tensorrt_ros_nodelet_cppfiles ${nodelet_cppfile})
+  list(APPEND _onnx_tensorrt_ros_nodelet_targets ${node_name}_exe)
+endmacro()
+
+add_nodelet(onnx_tensorrt_ros src/nodelet/onnx_tensorrt_ros_nodelet.cpp)
+
+add_library(${PROJECT_NAME} SHARED
+  src/nodelet/nodelet.cpp
+  ${_onnx_tensorrt_ros_nodelet_cppfiles}
+)
+
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+
+install(TARGETS ${PROJECT_NAME}
+        DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
