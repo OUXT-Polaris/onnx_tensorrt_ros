@@ -20,6 +20,18 @@
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 
+// Headers in TensorRT
+#include <NvInfer.h>
+#include <NvOnnxParser.h>
+#include <argsParser.h>
+#include <logger.h>
+#include <common.h>
+
+// Headers in CUDA
+#include <cuda_runtime_api.h>
+
+samplesCommon::Args gArgs;
+
 namespace onnx_tensorrt_ros
 {
     class OnnxTensorRTNodelet : public onnx_tensorrt_ros::Nodelet
@@ -103,6 +115,42 @@ namespace onnx_tensorrt_ros
                     return;
                 }
             }
+
+            bool onnxToTRTModel(const std::string& modelFile, // name of the onnx model
+                    unsigned int maxBatchSize,    // batch size - NB must be at least as large as the batch we want to run with
+                    nvinfer1::IHostMemory*& trtModelStream) // output buffer for the TensorRT model
+            {
+                using namespace nvinfer1;
+                // create the builder
+                IBuilder* builder = createInferBuilder(gLogger.getTRTLogger());
+                ROS_ASSERT(builder != nullptr);
+                INetworkDefinition* network = builder->createNetwork();
+                auto parser = nvonnxparser::createParser(*network, gLogger.getTRTLogger());
+                if ( !parser->parseFromFile( locateFile(modelFile, gArgs.dataDirs).c_str(), static_cast<int>(gLogger.getReportableSeverity()) ) )
+                {
+                    NODELET_ERROR_STREAM("Failure while parsing ONNX file");
+                    return false;
+                }
+                builder->setMaxBatchSize(maxBatchSize);
+                builder->setMaxWorkspaceSize(1 << 20);
+                builder->setFp16Mode(gArgs.runInFp16);
+                builder->setInt8Mode(gArgs.runInInt8);
+                if (gArgs.runInInt8)
+                {
+                    samplesCommon::setAllTensorScales(network, 127.0f, 127.0f);
+                }
+                samplesCommon::enableDLA(builder, gArgs.useDLACore);
+                ICudaEngine* engine = builder->buildCudaEngine(*network);
+                ROS_ASSERT(engine);
+                parser->destroy();
+                // serialize the engine, then close everything down
+                trtModelStream = engine->serialize();
+                engine->destroy();
+                network->destroy();
+                builder->destroy();
+                return true;
+            }
+
             boost::shared_ptr<image_transport::ImageTransport> it_;
             image_transport::Subscriber img_sub_;
             ros::Publisher result_pub_;
