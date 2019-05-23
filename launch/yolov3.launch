@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="image_topic" default="image_raw" />
+
+    <include file="$(find onnx_tensorrt_ros)/launch/onnx_tensorrt_ros.launch">
+        <arg name="image_topic" default="$(arg image_topic)" />
+    </include>
+</launch>
