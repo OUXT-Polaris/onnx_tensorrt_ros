@@ -32,13 +32,15 @@ include_directories(
   ${CUDA_INCLUDE_DIRS}
 )
 
+link_directories(third_party/TensorRT-5.1.5.0/lib)
+
 macro(add_nodelet node_name nodelet_cppfile)
   set(NODE_NAME ${node_name})
   set(NODELET_NAME onnx_tensorrt_ros/${node_name})
   configure_file(src/node/standalone_nodelet_exec.cpp.in ${node_name}.cpp @ONLY)
   add_executable(${node_name}_exe ${node_name}.cpp)
   SET_TARGET_PROPERTIES(${node_name}_exe PROPERTIES OUTPUT_NAME ${node_name})
-  target_link_libraries(${node_name}_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${CUDA_LIBRARIES})
+  target_link_libraries(${node_name}_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${CUDA_LIBRARIES} nvinfer nvparsers)
   list(APPEND _onnx_tensorrt_ros_nodelet_cppfiles ${nodelet_cppfile})
   list(APPEND _onnx_tensorrt_ros_nodelet_targets ${node_name}_exe)
 endmacro()
@@ -50,13 +52,13 @@ add_library(${PROJECT_NAME} SHARED
   ${_onnx_tensorrt_ros_nodelet_cppfiles}
 )
 
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${CUDA_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${CUDA_LIBRARIES} nvinfer nvparsers)
 
-set(FILE "${CMAKE_CURRENT_SOURCE_DIR}/data/yolov3.onnx")
+set(FILE "${CMAKE_SOURCE_DIR}/data/yolov3.onnx")
 message(STATUS "Checking and downloading yolov3.onnx if needed ...")
 if (NOT EXISTS "${FILE}")
   message(STATUS "... file does not exist. Downloading now ...")
-  execute_process(COMMAND wget https://onnxzoo.blob.core.windows.net/models/opset_10/yolov3/yolov3.onnx)
+  execute_process(COMMAND wget https://onnxzoo.blob.core.windows.net/models/opset_10/yolov3/yolov3.onnx -o ${CMAKE_SOURCE_DIR}/data/yolov3.onnx)
 endif()
 
 # Install

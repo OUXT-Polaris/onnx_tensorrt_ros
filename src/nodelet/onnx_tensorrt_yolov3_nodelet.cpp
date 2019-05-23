@@ -44,6 +44,7 @@ namespace onnx_tensorrt_ros
                 pnh_->param<std::string>("image_topic", image_topic_, "image_raw");
                 pnh_->param<std::string>("class_meta_file", class_meta_file_, "");
                 pnh_->param<std::string>("vision_info_topic", vision_info_topic_, "vision_info");
+                pnh_->param<std::string>("onnx_model_path", onnx_model_path_, "");
                 ifs_.open(class_meta_file_);
                 if (ifs_.fail())
                 {
@@ -85,6 +86,12 @@ namespace onnx_tensorrt_ros
                 vision_info_msg.database_location = pnh_->getNamespace() + "/class_meta_info";
                 vision_info_pub_.publish(vision_info_msg);
                 result_pub_ = pnh_->advertise<vision_msgs::Detection2DArray>("result",1);
+                IHostMemory* trt_model_stream{nullptr};
+                if (!onnxToTRTModel(onnx_model_path_, 1, trt_model_stream))
+                {
+                    NODELET_ERROR_STREAM("failed to load onnx model");
+                }
+                ROS_ASSERT(trt_model_stream != nullptr);
                 onInitPostProcess();
                 return;
             }
@@ -116,22 +123,22 @@ namespace onnx_tensorrt_ros
                 }
             }
 
-            bool onnxToTRTModel(const std::string& modelFile, // name of the onnx model
-                    unsigned int maxBatchSize,    // batch size - NB must be at least as large as the batch we want to run with
-                    nvinfer1::IHostMemory*& trtModelStream) // output buffer for the TensorRT model
+            bool onnxToTRTModel(const std::string& model_file, // name of the onnx model
+                    unsigned int max_batch_xize,    // batch size - NB must be at least as large as the batch we want to run with
+                    nvinfer1::IHostMemory*& trt_model_stream) // output buffer for the TensorRT model
             {
                 using namespace nvinfer1;
                 // create the builder
-                IBuilder* builder = createInferBuilder(gLogger.getTRTLogger());
+                IBuilder* builder = createInferBuilder(logger_);
                 ROS_ASSERT(builder != nullptr);
                 INetworkDefinition* network = builder->createNetwork();
-                auto parser = nvonnxparser::createParser(*network, gLogger.getTRTLogger());
-                if ( !parser->parseFromFile( locateFile(modelFile, gArgs.dataDirs).c_str(), static_cast<int>(gLogger.getReportableSeverity()) ) )
+                auto parser = nvonnxparser::createParser(*network, logger_);
+                if ( !parser->parseFromFile( locateFile(model_file, gArgs.dataDirs).c_str(), static_cast<int>(logger_.getReportableSeverity()) ) )
                 {
                     NODELET_ERROR_STREAM("Failure while parsing ONNX file");
                     return false;
                 }
-                builder->setMaxBatchSize(maxBatchSize);
+                builder->setMaxBatchSize(max_batch_xize);
                 builder->setMaxWorkspaceSize(1 << 20);
                 builder->setFp16Mode(gArgs.runInFp16);
                 builder->setInt8Mode(gArgs.runInInt8);
@@ -144,7 +151,7 @@ namespace onnx_tensorrt_ros
                 ROS_ASSERT(engine);
                 parser->destroy();
                 // serialize the engine, then close everything down
-                trtModelStream = engine->serialize();
+                trt_model_stream = engine->serialize();
                 engine->destroy();
                 network->destroy();
                 builder->destroy();
@@ -161,6 +168,8 @@ namespace onnx_tensorrt_ros
             std::string class_meta_file_;
             std::map<int,std::string> classes_;
             std::ifstream ifs_;
+            std::string onnx_model_path_;
+            Logger logger_;
     };
 }
 

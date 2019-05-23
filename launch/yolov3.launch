@@ -4,10 +4,14 @@
   <arg name="image_topic" default="image_raw" />
   <arg name="vision_info_topic" default="$(arg node_name)/vision_info"/>
   <arg name="visualization" default="true"/>
+  <arg name="class_meta_file" default="$(find onnx_tensorrt_ros)/data/coco.xml"/>
+  <arg name="onnx_model_path" default="$(find onnx_tensorrt_ros)/data/yolov3.onnx"/>
 
   <node name="$(arg node_name)" pkg="onnx_tensorrt_ros" type="onnx_tensorrt_yolov3" respawn="$(arg respawn)" output="log">
     <param name="image_topic" value="$(arg image_topic)"/>
     <param name="vision_info_topic" value="$(arg vision_info_topic)"/>
+    <param name="class_meta_file" value="$(arg class_meta_file)"/>
+    <param name="onnx_model_path" value="$(arg onnx_model_path)"/>
   </node>
 
   <group if="$(arg visualization)">
