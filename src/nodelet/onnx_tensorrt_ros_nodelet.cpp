@@ -148,6 +148,7 @@ namespace onnx_tensorrt_ros
                 engine->destroy();
                 network->destroy();
                 builder->destroy();
+
                 return true;
             }
 

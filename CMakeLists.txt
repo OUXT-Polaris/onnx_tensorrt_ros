@@ -13,6 +13,8 @@ find_package(catkin REQUIRED COMPONENTS
   vision_msgs
   pluginlib
   nodelet
+  image_transport
+  cv_bridge
 )
 
 catkin_package(
