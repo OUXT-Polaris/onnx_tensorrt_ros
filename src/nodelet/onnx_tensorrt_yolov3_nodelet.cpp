@@ -34,7 +34,7 @@ samplesCommon::Args gArgs;
 
 namespace onnx_tensorrt_ros
 {
-    class OnnxTensorRTNodelet : public onnx_tensorrt_ros::Nodelet
+    class OnnxTensorRTYoloV3Nodelet : public onnx_tensorrt_ros::Nodelet
     {
         public:
             virtual void onInit()  // NOLINT(modernize-use-override)
@@ -92,7 +92,7 @@ namespace onnx_tensorrt_ros
             void subscribe()  // NOLINT(modernize-use-override)
             {
                 NODELET_DEBUG("subscribe");
-                img_sub_ = it_->subscribe(image_topic_, 1, &OnnxTensorRTNodelet::imageCallback, this);
+                img_sub_ = it_->subscribe(image_topic_, 1, &OnnxTensorRTYoloV3Nodelet::imageCallback, this);
                 return;
             }
 
@@ -165,4 +165,4 @@ namespace onnx_tensorrt_ros
 }
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(onnx_tensorrt_ros::OnnxTensorRTNodelet, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(onnx_tensorrt_ros::OnnxTensorRTYoloV3Nodelet, nodelet::Nodelet);

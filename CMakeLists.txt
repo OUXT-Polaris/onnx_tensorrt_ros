@@ -43,7 +43,7 @@ macro(add_nodelet node_name nodelet_cppfile)
   list(APPEND _onnx_tensorrt_ros_nodelet_targets ${node_name}_exe)
 endmacro()
 
-add_nodelet(onnx_tensorrt_ros src/nodelet/onnx_tensorrt_ros_nodelet.cpp third_party/TensorRT-5.1.5.0/samples/common/logger.cpp)
+add_nodelet(onnx_tensorrt_yolov3 src/nodelet/onnx_tensorrt_yolov3_nodelet.cpp third_party/TensorRT-5.1.5.0/samples/common/logger.cpp)
 
 add_library(${PROJECT_NAME} SHARED
   src/nodelet/nodelet.cpp

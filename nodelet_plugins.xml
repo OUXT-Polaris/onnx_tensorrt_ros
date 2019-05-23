@@ -1,5 +1,5 @@
 <library path="lib/libonnx_tensorrt_ros">
-    <class name="onnx_tensorrt_ros/onnx_tensorrt_ros" type="onnx_tensorrt_ros::OnnxTensorRTNodelet" base_class_type="nodelet::Nodelet">
+    <class name="onnx_tensorrt_ros/onnx_tensorrt_yolov3" type="onnx_tensorrt_ros::OnnxTensorRTYoloV3Nodelet" base_class_type="nodelet::Nodelet">
         <description>Nodelet for image detection using nnabla</description>
     </class>
 </library>

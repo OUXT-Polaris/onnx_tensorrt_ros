@@ -20,3 +20,6 @@ put TensorRT-5.1.5.0.Ubuntu-18.04.2.x86_64-gnu.cuda-10.0.cudnn7.5.tar.gz into th
 ```
 tar -xvzf TensorRT-5.1.5.0.Ubuntu-18.04.2.x86_64-gnu.cuda-10.0.cudnn7.5.tar.gz
 ```
+
+## Download model
+All models can be download from here(https://github.com/onnx/models)
