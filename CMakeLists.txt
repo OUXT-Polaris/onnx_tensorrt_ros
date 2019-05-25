@@ -40,7 +40,7 @@ macro(add_nodelet node_name nodelet_cppfile)
   configure_file(src/node/standalone_nodelet_exec.cpp.in ${node_name}.cpp @ONLY)
   add_executable(${node_name}_exe ${node_name}.cpp)
   SET_TARGET_PROPERTIES(${node_name}_exe PROPERTIES OUTPUT_NAME ${node_name})
-  target_link_libraries(${node_name}_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${CUDA_LIBRARIES} nvinfer nvparsers)
+  target_link_libraries(${node_name}_exe ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${CUDA_LIBRARIES} nvinfer nvparsers nvonnxparser)
   list(APPEND _onnx_tensorrt_ros_nodelet_cppfiles ${nodelet_cppfile})
   list(APPEND _onnx_tensorrt_ros_nodelet_targets ${node_name}_exe)
 endmacro()
@@ -52,7 +52,7 @@ add_library(${PROJECT_NAME} SHARED
   ${_onnx_tensorrt_ros_nodelet_cppfiles}
 )
 
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${CUDA_LIBRARIES} nvinfer nvparsers)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${CUDA_LIBRARIES} nvinfer nvparsers nvonnxparser)
 
 set(FILE "${CMAKE_SOURCE_DIR}/data/yolov3.onnx")
 message(STATUS "Checking and downloading yolov3.onnx if needed ...")
@@ -77,6 +77,6 @@ install(FILES nodelet_plugins.xml
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
-install(DIRECTORY launch data
+install(DIRECTORY launch data third_party
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         USE_SOURCE_PERMISSIONS)
